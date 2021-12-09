@@ -1,46 +1,30 @@
 import React from "react";
-import { NavLink, Route, Switch, Redirect } from "react-router-dom";
+import { Route, Switch, Redirect } from "react-router-dom";
 
 import Home from "./Home/Home";
 import MoviesPage from "./MoviesPage/MoviesPage";
 import MovieDetailsPage from "./MovieDetailsPage/MovieDetailsPage";
+import Layout from "./Layout/Layout";
 
 import paths from "../utils/paths";
+import Header from "./Header/Header";
 
 class App extends React.Component {
   render() {
     return (
-      <div>
-        <ul>
-          <li>
-            <NavLink
-              exact
-              to={paths.home}
-              className="Nav"
-              activeClassName="Nav-active"
-            >
-              Home
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to={paths.movies}
-              className="Nav"
-              activeClassName="Nav-active"
-            >
-              Movies
-            </NavLink>
-          </li>
-        </ul>
-        <Switch>
-          <Route path={paths.home} exact component={Home} />
-          <Route path={paths.movie} component={MovieDetailsPage} />
-          <Route path={paths.movies} component={MoviesPage} />
-          <Route>
-            <Redirect to={paths.home} />
-          </Route>
-        </Switch>
-      </div>
+      <>
+        <Header />
+        <Layout>
+          <Switch>
+            <Route path={paths.home} exact component={Home} />
+            <Route path={paths.movie} component={MovieDetailsPage} />
+            <Route path={paths.movies} component={MoviesPage} />
+            <Route>
+              <Redirect to={paths.home} />
+            </Route>
+          </Switch>
+        </Layout>
+      </>
     );
   }
 }
