@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 import LoadSpiner from "../LoadSpiner/LoadSpiner";
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
@@ -38,6 +39,11 @@ const Button = styled.button`
   }
 `;
 
+const StyledLink = styled(Link)`
+  text-decoration: none;
+  color: black;
+`;
+
 class MoviesPage extends React.Component {
   state = {
     input: "",
@@ -47,21 +53,35 @@ class MoviesPage extends React.Component {
     isLoading: false,
   };
 
+  componentDidMount() {
+    if (this.props.location.search !== "") {
+      this.setState({
+        query: this.props.location.search,
+        input: this.props.location.search.slice(1),
+      });
+    }
+  }
+
   componentDidUpdate(prevProps, prevState) {
     if (prevState.query !== this.state.query) {
-      this.setState({ isLoading: true });
-      apiServices
-        .fetchMovieByQuery(this.state.query, this.state.page)
-        .then((data) => {
-          this.setState({
-            movies: data,
-            isLoading: false,
-            page: (prevState.page += 1),
-          });
-        });
+      this.setState({ isLoading: true, page: 0, movies: [] });
+      this.fetchMovies();
     }
-    console.log(prevState.query, this.state.query);
   }
+
+  fetchMovies = () => {
+    apiServices
+      .fetchMovieByQuery(this.state.query, this.state.page)
+      .then((data) => {
+        this.setState((prevState) => {
+          return {
+            movies: [...prevState.movies, ...data],
+            isLoading: false,
+            page: prevState.page + 1,
+          };
+        });
+      });
+  };
 
   handleInput = (e) => {
     this.setState({ input: e.target.value });
@@ -70,9 +90,14 @@ class MoviesPage extends React.Component {
   handleSubmit = (e) => {
     e.preventDefault();
     this.setState({ query: this.state.input });
+    this.props.history.replace({
+      pathname: this.props.location.pathname,
+      search: `${this.state.input}`,
+    });
   };
 
   render() {
+    const { match } = this.props;
     return (
       <>
         <Form onSubmit={this.handleSubmit}>
@@ -80,12 +105,15 @@ class MoviesPage extends React.Component {
             type="text"
             placeholder="Print movie name"
             onChange={this.handleInput}
+            value={this.state.input}
           />
           <Button type="submit">Find</Button>
         </Form>
         {this.state.movies.length > 0 &&
           this.state.movies.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} />
+            <StyledLink to={`${match.url}/${movie.id}`} key={movie.id}>
+              <MovieCard movie={movie} />
+            </StyledLink>
           ))}
         {this.state.isLoading && <LoadSpiner />}
       </>
